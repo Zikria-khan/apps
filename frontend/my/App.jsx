@@ -1,9 +1,9 @@
 import React from 'react';
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
-import StartRecording from './components/StartRecording/StartRecoding';
-import AllRecordings from './components/AllRecordings/AllRecordings';
-import Home from './components/pages/Home';
-import Navbar from './components/Navbar/Navabar';
+import StartRecording from './src/components/StartRecording/StartRecoding';
+import AllRecordings from './src/components/AllRecordings/AllRecordings';
+import Home from './src/components/pages/Home';
+import Navbar from './src/components/Navbar/Navabar';
 import "./App.css"
 function App() {
   return (

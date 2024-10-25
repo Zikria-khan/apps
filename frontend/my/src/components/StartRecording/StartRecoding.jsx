@@ -27,6 +27,7 @@ const StartRecording = () => {
         setAudioUrl(audioUrl);
         setUploading(true);
 
+        // Upload the audio file
         await uploadAudio(audioBlob);
         // Revoke the object URL to free memory
         URL.revokeObjectURL(audioUrl);
@@ -48,23 +49,21 @@ const StartRecording = () => {
     }
   };
 
-  const uploadAudio = async (file) => {
-    try {
-      const formData = new FormData();
-      formData.append('file', file);
+  const uploadAudio = async (audioBlob) => {
+    const formData = new FormData();
+    formData.append('file', audioBlob, 'recording.wav'); // Use a filename for the blob
 
+    try {
       const response = await axios.post('https://apps-8gvh.vercel.app/upload', formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
         },
       });
-
       console.log('File uploaded successfully:', response.data);
+      setUploading(false); // Reset uploading state
     } catch (error) {
       console.error('Error uploading file:', error);
-      alert('Failed to upload audio. Please try again later.');
-    } finally {
-      setUploading(false);
+      setUploading(false); // Reset uploading state on error
     }
   };
 

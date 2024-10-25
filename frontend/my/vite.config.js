@@ -5,7 +5,7 @@ import react from '@vitejs/plugin-react';
 export default defineConfig({
   plugins: [react()],
   build: {
-    outDir: 'frontend/dist',   // This will be the output directory for the production build
+    outDir: 'frontend/my/dist',   // This will be the output directory for the production build
     rollupOptions: {
       // The 'external' option is not needed unless you want to externalize certain modules
     },

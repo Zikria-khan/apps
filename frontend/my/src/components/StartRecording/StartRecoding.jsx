@@ -5,6 +5,7 @@ import axios from 'axios';
 const StartRecording = () => {
   const [isRecording, setIsRecording] = useState(false);
   const [audioUrl, setAudioUrl] = useState(null);
+  const [uploading, setUploading] = useState(false);
   const audioChunksRef = useRef([]);
   const [mediaRecorder, setMediaRecorder] = useState(null);
 
@@ -13,22 +14,30 @@ const StartRecording = () => {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
       const recorder = new MediaRecorder(stream);
       audioChunksRef.current = [];
+
       recorder.ondataavailable = (event) => {
         if (event.data.size > 0) {
           audioChunksRef.current.push(event.data);
         }
       };
+
       recorder.onstop = async () => {
         const audioBlob = new Blob(audioChunksRef.current, { type: 'audio/wav' });
         const audioUrl = URL.createObjectURL(audioBlob);
         setAudioUrl(audioUrl);
+        setUploading(true);
+
         await uploadAudio(audioBlob);
+        // Revoke the object URL to free memory
+        URL.revokeObjectURL(audioUrl);
       };
+
       recorder.start();
       setMediaRecorder(recorder);
       setIsRecording(true);
     } catch (err) {
       console.error('Error accessing the microphone: ', err);
+      alert('Could not access the microphone. Please check your permissions.');
     }
   };
 
@@ -39,15 +48,23 @@ const StartRecording = () => {
     }
   };
 
-  const uploadAudio = async (audioBlob) => {
-    const formData = new FormData();
-    formData.append('file', audioBlob, 'recording.wav');
+  const uploadAudio = async (file) => {
     try {
-      await axios.post('mern-stack-websites.vercel.app/upload', formData, {
-        headers: { 'Content-Type': 'multipart/form-data' },
+      const formData = new FormData();
+      formData.append('file', file);
+
+      const response = await axios.post('https://apps-8gvh.vercel.app/upload', formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
       });
+
+      console.log('File uploaded successfully:', response.data);
     } catch (error) {
       console.error('Error uploading file:', error);
+      alert('Failed to upload audio. Please try again later.');
+    } finally {
+      setUploading(false);
     }
   };
 
@@ -59,7 +76,8 @@ const StartRecording = () => {
       ) : (
         <button className="btn" onClick={stopRecording}>Stop Recording</button>
       )}
-      {audioUrl && <audio src={audioUrl} controls />}
+      {uploading && <p>Uploading audio...</p>}
+      {audioUrl && !uploading && <audio src={audioUrl} controls />}
     </div>
   );
 };
